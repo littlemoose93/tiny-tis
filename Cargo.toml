@@ -2,7 +2,7 @@
 name = "tiny-tls"
 version = "0.1.0"
 edition = "2021"
-license = "mit"
+license = "MIT"
 description = "A soon to be minimimalistic TLSv1.3 server/client only supporting PSK"
 
 [dependencies]
