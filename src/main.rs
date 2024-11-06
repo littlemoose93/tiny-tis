@@ -1,0 +1,50 @@
+use std::io::{Read, Write};
+
+
+fn main() {
+    let mut args = std::env::args();
+    let bin_name = args.next().unwrap();
+    let ip = args.next().unwrap();
+
+    let mut conn = std::net::TcpStream::connect(ip).unwrap();
+
+    let mut ch = Vec::new();
+
+    // Handshake record
+    ch.push(0x16);
+
+    // TLS 1.0 version number
+    ch.extend_from_slice(&[0x3, 0x1]);
+    
+    // Payload length, to be updated
+    ch.extend_from_slice(&[0x0, 0xf8]);
+    assert!(ch.len() == 5);
+
+    // Handshake header
+    ch.push(1);
+    // Remaining client payload
+    ch.extend_from_slice(&[0, 0, 0xf4]);
+
+    // Client version of tls 1.2, ssl 3.0 was 3, 0
+    ch.extend_from_slice(&[3, 3]);
+
+    // Client random data
+    ch.extend_from_slice(&[0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f]);
+
+    // Fake tls 1.2 session id
+    // Session id length
+    ch.push(0x20);
+    // Fake session id
+    ch.extend_from_slice(&[0xe0,0xe1,0xe2,0xe3,0xe4,0xe5,0xe6,0xe7,0xe8,0xe9,0xea,0xeb,0xec,0xed,0xee,0xef,0xf0,0xf1,0xf2,0xf3,0xf4,0xf5,0xf6,0xf7,0xf8,0xf9,0xfa,0xfb,0xfc,0xfd,0xfe,0xff        ]);
+
+
+
+    conn.write_all(&ch).unwrap();
+    let mut out = Vec::new();
+
+    let bytes_read = conn.read_to_end(&mut out).unwrap();
+
+    println!("{bytes_read} bytes_read");
+    println!("out: {out:?}");
+}
+
